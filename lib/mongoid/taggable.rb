@@ -63,7 +63,7 @@ module Mongoid::Taggable
     # adapted from https://github.com/jesuisbonbon/mongoid_taggable/commit/42feddd24dedd66b2b6776f9694d1b5b8bf6903d
     def tags_autocomplete(criteria, options={})
       result = tags_index_collection.master.find({:_id => /^#{criteria}/})
-      result = result.desc(:value) if options[:sort_by_count] == true
+      result = result.order_by([[:value, :desc]]) if options[:sort_by_count] == true
       result = result.limit(options[:max]) if options[:max]
       result.to_a.map{ |r| [r["_id"], r["value"]] }
     end
