@@ -204,7 +204,7 @@ describe Mongoid::Taggable do
     end
 
     it 'should retrieve the first #{max} tags that start with #{criteria} sorted by weight (configurable)' do
-      result = MyModel.tags_autocompleteS("c", max: 5, sort_by_count: -1)
+      result = MyModel.tags_autocompleteS("c", max: 5, sort_by_count: true)
       result.length.should == 5
       %w[c++ clojure common-lisp c# c].each_with_index do |tag, index|
         result[index].should == tag
