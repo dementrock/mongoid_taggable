@@ -61,9 +61,9 @@ module Mongoid::Taggable
     end
 
     # adapted from https://github.com/jesuisbonbon/mongoid_taggable/commit/42feddd24dedd66b2b6776f9694d1b5b8bf6903d
-    # retrieve the first #{max} tags that start with #{criteria} and with the highest weight
+    # retrieve the first #{max} tags that start with #{criteria} sorted by weight
     def tags_autocomplete(criteria, max=5)
-      tags_index_collection.master.find({:_id => /^#{criteria}/}).sort(:value: -1).limit(max).to_a.map{ |r| [r["_id"], r["value"]] }
+      tags_index_collection.master.find({:_id => /^#{criteria}/}).sort(value: -1).limit(max).to_a.map{ |r| [r["_id"], r["value"]] }
     end
 
     def disable_tags_index!
