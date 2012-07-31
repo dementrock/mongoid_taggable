@@ -21,7 +21,6 @@ class MyModel
 end
 
 describe Mongoid::Taggable do
-
   describe "default tags array value" do
     it 'should be an empty array' do
       MyModel.new.tags_array.should == []
@@ -123,20 +122,18 @@ describe Mongoid::Taggable do
       @m.tags.should == "some;other;sep"
     end
   end
-
   context "indexing tags" do
     it "should generate the index collection name based on model" do
       MyModel.tags_index_collection_name.should == "my_models_tags_index"
     end
 
     it "should generate the index collection model based on model" do
-      MyModel.tags_index_collection.should be_a Mongoid::Collection
+      MyModel.tags_index_collection.should be_a Moped::Collection
     end
 
     it "should generate the index collection model based on model with the collection name" do
       MyModel.tags_index_collection.name.should == "my_models_tags_index"
     end
-
     context "retrieving index" do
       before :each do
         MyModel.create!(:tags => "food,ant,bee")
@@ -160,7 +157,6 @@ describe Mongoid::Taggable do
         ]
       end
     end
-
     context "avoiding index generation" do
       before :all do
         MyModel.disable_tags_index!
@@ -175,24 +171,21 @@ describe Mongoid::Taggable do
         MyModel.tags.should == []
       end
     end
-
     it 'should launch the map/reduce if index activate and tag_arrays change' do
       m = MyModel.create!(:tags => "food,ant,bee")
-      m.tags = 'juice,food'
-      MyModel.collection.master.should_receive(:map_reduce)
+      m.tags = 'something'
       m.save
+      MyModel.tags.should include "something"
     end
 
     it 'should not launch the map/reduce if index activate and tag_arrays not change' do
       m = MyModel.create!(:tags => "food,ant,bee")
-      MyModel.collection.master.should_not_receive(:map_reduce)
       m.save
       m.name = 'hello'
       m.save
+      MyModel.should_not_receive(:map_reduce)
     end
-
   end
-
   context "autocomplete tag" do
     before :each do
       MyModel.create!(:tags => "c++, clojure, common-lisp, c#, c, coffeescript")
@@ -204,13 +197,12 @@ describe Mongoid::Taggable do
     end
 
     it 'should retrieve the first #{max} tags that start with #{criteria} sorted by weight (configurable)' do
-      result = MyModel.tags_autocompleteS("c", max: 5, sort_by_count: true)
+      result = MyModel.tags_autocomplete("c", max: 5, sort_by_count: true)
       result.length.should == 5
       %w[c++ clojure common-lisp c# c].each_with_index do |tag, index|
-        result[index].should == tag
+        result[index].first.should == tag
       end
     end
 
   end
-
 end

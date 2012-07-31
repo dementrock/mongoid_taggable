@@ -16,7 +16,7 @@ module Mongoid::Taggable
   def self.included(base)
     # create fields for tags and index it
     base.field :tags_array, :type => Array, :default => []
-    base.index 'tags_array' => 1 #[['tags_array', Mongo::ASCENDING]]
+    base.index 'tags_array' => 1
 
     # add callback to save tags index
     base.after_save do |document|
@@ -62,8 +62,8 @@ module Mongoid::Taggable
 
     # adapted from https://github.com/jesuisbonbon/mongoid_taggable/commit/42feddd24dedd66b2b6776f9694d1b5b8bf6903d
     def tags_autocomplete(criteria, options={})
-      result = tags_index_collection.master.find({:_id => /^#{criteria}/})
-      result = result.sort([[:value, :desc]]) if options[:sort_by_count] == true
+      result = tags_index_collection.find({:_id => /^#{criteria}/})
+      result = result.sort(value: -1) if options[:sort_by_count] == true
       result = result.limit(options[:max]) if options[:max]
       result.to_a.map{ |r| [r["_id"], r["value"]] }
     end
@@ -98,6 +98,7 @@ module Mongoid::Taggable
         }
 
         for (index in this.tags_array) {
+          print(this.tags_array[index]);
           emit(this.tags_array[index], 1);
         }
       }"
@@ -112,7 +113,7 @@ module Mongoid::Taggable
         return count;
       }"
 
-     self.map_reduce(map, reduce).out(replace: "tags_index_collection_name")
+     self.map_reduce(map, reduce).out(replace: tags_index_collection_name).time
     end
   end
 
