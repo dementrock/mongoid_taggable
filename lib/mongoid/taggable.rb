@@ -98,7 +98,6 @@ module Mongoid::Taggable
         }
 
         for (index in this.tags_array) {
-          print(this.tags_array[index]);
           emit(this.tags_array[index], 1);
         }
       }"
